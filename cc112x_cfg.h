@@ -331,9 +331,13 @@ static cc112x_reg_setting_t ook_870_transparent[]=
 	   {CC112X_PKT_CFG2,          0x07},
 	   {CC112X_PKT_CFG1,          0x00},
 	   {CC112X_PKT_CFG0,          0x20},
-	   {CC112X_PA_CFG2,           0x75}, //77
-	   //{CC112X_PA_CFG1,           0x00},
-	   {CC112X_PA_CFG0,           0x6D}, //6D
+	   //27dBm
+	   {CC112X_PA_CFG2,           0x77},
+	   {CC112X_PA_CFG0,           0x7D},
+	   //17dBm
+//	   {CC112X_PA_CFG2,           0x53},
+//	   {CC112X_PA_CFG0,           0x25},
+
 	   {CC112X_IF_MIX_CFG,        0x00},
 	   {CC112X_FREQOFF_CFG,       0x00},
 	   {CC112X_TOC_CFG,           0x0A},

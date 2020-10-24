@@ -1,4 +1,4 @@
-set(SOURCES cc112x_hal.c cc112x.c)
+set(SOURCES "cc112x_hal.c" "cc112x.c")
 
 idf_component_register(SRCS "${SOURCES}"
 					INCLUDE_DIRS .

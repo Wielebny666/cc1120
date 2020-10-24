@@ -53,8 +53,8 @@ void cc112x_init_config(void)
 {
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
-	foreach (cc112x_reg_setting_t *cfg, cc112x_tx_reg_setting) //cc112x_test_reg_setting)//
-	//foreach (cc112x_reg_setting_t *cfg, ook_870_transparent)
+	//foreach (cc112x_reg_setting_t *cfg, preferredSettings) //cc112x_tx_reg_setting) //cc112x_test_reg_setting)//
+	foreach (cc112x_reg_setting_t *cfg, ook_870_transparent)
 	{
 		cc112x_write_register(cfg->addr, cfg->data);
 	}
@@ -287,17 +287,6 @@ void cc112x_set_agc_ask_decay(uint8_t value)
 	cc112x_write_register(CC112X_AGC_CFG0, agc_cfg0.reg);
 }
 
-void cc112x_set_pa_power_ramp(uint8_t value)
-{
-	if (value > 0x3F)
-		value = 0x3F;
-	pa_cfg2_t pa_cfg2;
-	cc112x_read_register(CC112X_PA_CFG2, &pa_cfg2.reg);
-	pa_cfg2.pa_power_ramp = value;
-	cc112x_write_register(CC112X_PA_CFG2, pa_cfg2.reg);
-}
-
-
 void cc112x_set_tx_power(int8_t power)
 {
 	if (power > 0x27)
@@ -309,14 +298,26 @@ void cc112x_set_tx_power(int8_t power)
 	cc112x_set_pa_power_ramp(pa_power_ramp);
 }
 
+void cc112x_set_pa_power_ramp(uint8_t value)
+{
+	if (value > 0x3F)
+		value = 0x3F;
+	pa_cfg2_t pa_cfg2;
+	ESP_ERROR_CHECK(cc112x_read_register(CC112X_PA_CFG2, &pa_cfg2.reg));
+	ESP_LOGE(TAG, "%d", pa_cfg2.pa_power_ramp);
+	pa_cfg2.pa_power_ramp = value;
+	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PA_CFG2, pa_cfg2.reg));
+}
+
 void cc112x_set_ask_depth(uint8_t value)
 {
 	if (value > 0x0F)
 		value = 0x0F;
 	pa_cfg0_t pa_cfg0;
-	cc112x_read_register(CC112X_PA_CFG0, &pa_cfg0.reg);
+	ESP_ERROR_CHECK(cc112x_read_register(CC112X_PA_CFG0, &pa_cfg0.reg));
+	ESP_LOGE(TAG, "%d", pa_cfg0.ask_depth);
 	pa_cfg0.ask_depth = value;
-	cc112x_write_register(CC112X_PA_CFG0, pa_cfg0.reg);
+	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PA_CFG0, pa_cfg0.reg));
 }
 
 void cc112x_set_gpio0_inv(bool inv)
@@ -523,10 +524,7 @@ int32_t cc112x_get_mixer_freq(void)
  */
 int32_t cc112x_get_freq_error(void)
 {
-	uint8_t reg[2] =
-		{
-			0,
-			0 };
+	uint8_t reg[2] = { 0,0 };
 	cc112x_read_register(CC112X_FREQOFF_EST0, &reg[0]);
 	cc112x_read_register(CC112X_FREQOFF_EST1, &reg[1]);
 	uint16_t freq_reg_error = ((uint16_t) reg[1] << 8) | reg[0];
