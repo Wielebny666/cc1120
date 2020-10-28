@@ -44,7 +44,7 @@ static uint8_t cc112x_2[0x41];
 /**********************
  *      MACROS
  **********************/
-#define MAX( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -132,7 +132,7 @@ int8_t cc112x_get_rssi(void)
 	if (cc112x_get_rssi_valid())
 	{
 		cc112x_read_register(CC112X_RSSI1, &rssi);
-		return (int8_t) rssi + RF_RSSI_OFFSET;
+		return (int8_t)rssi + RF_RSSI_OFFSET;
 	}
 	return 0;
 }
@@ -153,7 +153,7 @@ int8_t cc112x_get_converted_rssi(void)
 	cc112x_read_register(CC112X_RSSI0, &rssi0);
 
 	if (rssi0 & 0x01)
-		return (int16_t) ((rssi1 << 3) | ((rssi0 & 0b01111000) >> 3)) * 0.0625 + RF_RSSI_OFFSET;
+		return (int16_t)((rssi1 << 3) | ((rssi0 & 0b01111000) >> 3)) * 0.0625 + RF_RSSI_OFFSET;
 	else
 		return 0;
 }
@@ -178,17 +178,17 @@ uint32_t cc112x_get_symbol_rate(void)
 	uint8_t readByte[3];
 	float bitratetemp;
 	uint32_t bitrate;
-//Read datarate from registers
+	//Read datarate from registers
 	cc112x_read_register(CC112X_SYMBOL_RATE0, &readByte[0]);
 	cc112x_read_register(CC112X_SYMBOL_RATE1, &readByte[1]);
 	cc112x_read_register(CC112X_SYMBOL_RATE2, &readByte[2]);
 	drateE = (readByte[2] & 0xF0) >> 4;
 	drateM = (readByte[2] & 0x0F);
 	drateM = drateM << 16;
-	drateM |= (uint16_t) readByte[1] << 8;
+	drateM |= (uint16_t)readByte[1] << 8;
 	drateM |= readByte[0];
 	bitratetemp = ((pow(2, 20) + drateM) * pow(2, drateE)) / (pow(2, 39)) * RF_XTAL_FREQ;
-	bitrate = (uint32_t) roundf(bitratetemp);
+	bitrate = (uint32_t)roundf(bitratetemp);
 	return bitrate;
 }
 
@@ -291,7 +291,7 @@ void cc112x_set_tx_power(int8_t power)
 {
 	if (power > 0x27)
 		power = 0x27;
-	else if(power < -16)
+	else if (power < -16)
 		power = -16;
 	uint8_t pa_power_ramp;
 	pa_power_ramp = 2 * power + 35;
@@ -385,10 +385,7 @@ void cc112x_set_bw_filter_khz(uint8_t bw_filter_value_khz)
 	cc112x_read_register(CC112X_IQIC, &iqic.reg);
 	cc112x_read_register(CC112X_FREQ_IF_CFG, &freq_if);
 
-	uint8_t adc_cic_decfact[] =
-		{
-			20,
-			32 };
+	uint8_t adc_cic_decfact[] = {20, 32};
 	uint8_t bb_cic_decfact_last = 0;
 	uint8_t adc_cic_decfact_last = 0;
 
@@ -397,8 +394,7 @@ void cc112x_set_bw_filter_khz(uint8_t bw_filter_value_khz)
 
 	for (uint8_t adc = 0; adc <= 1; adc++)
 	{
-		for (uint8_t bb = (adc == 0 ? 25 : 15); bb > 0;
-				bb--)
+		for (uint8_t bb = (adc == 0 ? 25 : 15); bb > 0; bb--)
 		{
 			calc_bw_filter = RF_XTAL_FREQ / (8.0 * adc_cic_decfact[adc] * bb);
 
@@ -442,10 +438,10 @@ uint32_t cc112x_get_carrier_freq(void)
 	freq_regs_uint32 = (freq_regs[0] << 16) | (freq_regs[1] << 8) | freq_regs[2];
 
 	/* Divide by 2^16 */
-	f_vco = (double) freq_regs_uint32 / 65536;
+	f_vco = (double)freq_regs_uint32 / 65536;
 
 	/* Multiply by oscillator frequency */
-	f_vco *= (double) RF_XTAL_FREQ;
+	f_vco *= (double)RF_XTAL_FREQ;
 
 	/* VCO frequency -> Radio frequency */
 	freq = f_vco / RF_LO_DIVIDER;
@@ -483,12 +479,12 @@ void cc112x_set_carrier_freq(uint32_t freq)
 	f_vco *= 65536;
 
 	/* Convert value into uint32 from float */
-	freq_regs_uint32 = (uint32_t) f_vco;
+	freq_regs_uint32 = (uint32_t)f_vco;
 
 	/* return the frequency word */
-	freq_regs[2] = ((uint8_t*) &freq_regs_uint32)[0];
-	freq_regs[1] = ((uint8_t*) &freq_regs_uint32)[1];
-	freq_regs[0] = ((uint8_t*) &freq_regs_uint32)[2];
+	freq_regs[2] = ((uint8_t *)&freq_regs_uint32)[0];
+	freq_regs[1] = ((uint8_t *)&freq_regs_uint32)[1];
+	freq_regs[0] = ((uint8_t *)&freq_regs_uint32)[2];
 
 	/* write the frequency word to the transciever */
 	cc112x_write_burst_registers(CC112X_FREQ2, freq_regs, 3);
@@ -499,11 +495,11 @@ int32_t cc112x_get_mixer_freq(void)
 	int8_t freq_if;
 	float f_if;
 
-	cc112x_read_register(CC112X_FREQ_IF_CFG, (uint8_t*) &freq_if);
+	cc112x_read_register(CC112X_FREQ_IF_CFG, (uint8_t *)&freq_if);
 
-	f_if = (float) RF_XTAL_FREQ * freq_if * (1 / 32768);
+	f_if = (float)RF_XTAL_FREQ * freq_if * (1 / 32768);
 
-	return (int32_t) f_if;
+	return (int32_t)f_if;
 }
 
 /******************************************************************************
@@ -524,10 +520,10 @@ int32_t cc112x_get_mixer_freq(void)
  */
 int32_t cc112x_get_freq_error(void)
 {
-	uint8_t reg[2] = { 0,0 };
+	uint8_t reg[2] = {0, 0};
 	cc112x_read_register(CC112X_FREQOFF_EST0, &reg[0]);
 	cc112x_read_register(CC112X_FREQOFF_EST1, &reg[1]);
-	uint16_t freq_reg_error = ((uint16_t) reg[1] << 8) | reg[0];
+	uint16_t freq_reg_error = ((uint16_t)reg[1] << 8) | reg[0];
 	return cc112x_calculate_freq_error_est(freq_reg_error);
 }
 
@@ -549,52 +545,50 @@ void cc112x_manual_calibration(void)
 	uint8_t marcstate;
 	uint8_t writeByte;
 
-// 1) Set VCO cap-array to 0 (FS_VCO2 = 0x00)
+	// 1) Set VCO cap-array to 0 (FS_VCO2 = 0x00)
 	writeByte = 0x00;
 	cc112x_write_register(CC112X_FS_VCO2, writeByte);
 
-// 2) Start with high VCDAC (original VCDAC_START + 2):
+	// 2) Start with high VCDAC (original VCDAC_START + 2):
 	cc112x_read_register(CC112X_FS_CAL2, &original_fs_cal2);
 	writeByte = original_fs_cal2 + VCDAC_START_OFFSET;
 	cc112x_write_register(CC112X_FS_CAL2, writeByte);
 
-// 3) Calibrate and wait for calibration to be done (radio back in IDLE state)
+	// 3) Calibrate and wait for calibration to be done (radio back in IDLE state)
 	cc112x_command_strobe(CC112X_SCAL);
 
 	do
 	{
 		cc112x_read_register(CC112X_MARCSTATE, &marcstate);
-	}
-	while (marcstate != 0x41);
+	} while (marcstate != 0x41);
 
-// 4) Read FS_VCO2, FS_VCO4 and FS_CHP register obtained with high VCDAC_START value
+	// 4) Read FS_VCO2, FS_VCO4 and FS_CHP register obtained with high VCDAC_START value
 	cc112x_read_register(CC112X_FS_VCO2, &calResults_for_vcdac_start_high[FS_VCO2_INDEX]);
 	cc112x_read_register(CC112X_FS_VCO4, &calResults_for_vcdac_start_high[FS_VCO4_INDEX]);
 	cc112x_read_register(CC112X_FS_CHP, &calResults_for_vcdac_start_high[FS_CHP_INDEX]);
 
-// 5) Set VCO cap-array to 0 (FS_VCO2 = 0x00)
+	// 5) Set VCO cap-array to 0 (FS_VCO2 = 0x00)
 	writeByte = 0x00;
 	cc112x_write_register(CC112X_FS_VCO2, writeByte);
 
-// 6) Continue with mid VCDAC (original VCDAC_START):
+	// 6) Continue with mid VCDAC (original VCDAC_START):
 	writeByte = original_fs_cal2;
 	cc112x_write_register(CC112X_FS_CAL2, writeByte);
 
-// 7) Calibrate and wait for calibration to be done (radio back in IDLE state)
+	// 7) Calibrate and wait for calibration to be done (radio back in IDLE state)
 	cc112x_command_strobe(CC112X_SCAL);
 
 	do
 	{
 		cc112x_read_register(CC112X_MARCSTATE, &marcstate);
-	}
-	while (marcstate != 0x41);
+	} while (marcstate != 0x41);
 
-// 8) Read FS_VCO2, FS_VCO4 and FS_CHP register obtained with mid VCDAC_START value
+	// 8) Read FS_VCO2, FS_VCO4 and FS_CHP register obtained with mid VCDAC_START value
 	cc112x_read_register(CC112X_FS_VCO2, &calResults_for_vcdac_start_mid[FS_VCO2_INDEX]);
 	cc112x_read_register(CC112X_FS_VCO4, &calResults_for_vcdac_start_mid[FS_VCO4_INDEX]);
 	cc112x_read_register(CC112X_FS_CHP, &calResults_for_vcdac_start_mid[FS_CHP_INDEX]);
 
-// 9) Write back highest FS_VCO2 and corresponding FS_VCO and FS_CHP result
+	// 9) Write back highest FS_VCO2 and corresponding FS_VCO and FS_CHP result
 	if (calResults_for_vcdac_start_high[FS_VCO2_INDEX] > calResults_for_vcdac_start_mid[FS_VCO2_INDEX])
 	{
 		writeByte = calResults_for_vcdac_start_high[FS_VCO2_INDEX];
@@ -688,4 +682,3 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 
 	return freq_error_est_int;
 }
-
