@@ -36,6 +36,8 @@ typedef struct
 	gpio_num_t hgm;
 } cc112x_cfg_t;
 
+typedef void (*carrier_sense_callback_t)(bool value);
+
 typedef void *cc112x_handle_t;
 
 /**********************
@@ -43,6 +45,8 @@ typedef void *cc112x_handle_t;
  **********************/
 cc112x_handle_t cc112x_create(const cc112x_cfg_t *spi_cfg);
 esp_err_t cc112x_destroy(cc112x_handle_t, bool);
+
+esp_err_t cc112x_cs_intr_init(gpio_num_t cs_gpio, carrier_sense_callback_t cb);
 
 esp_err_t cc112x_hgm_on(void);
 esp_err_t cc112x_hgm_off(void);

@@ -307,9 +307,6 @@ extern "C"
 
 	static cc112x_reg_setting_t ook_870_transparent[] =
 		{
-			{CC112X_IOCFG3, 0x59}, //PA_EN
-			{CC112X_IOCFG2, 0x58}, //LNA_EN
-			{CC112X_IOCFG0, 0x09}, //TX_INPUT
 			{CC112X_DEVIATION_M, 0x26},
 			{CC112X_MODCFG_DEV_E, 0x1D},
 			{CC112X_DCFILT_CFG, 0x13},
@@ -318,13 +315,13 @@ extern "C"
 			{CC112X_IQIC, 0x00},
 			{CC112X_CHAN_BW, 0x03},
 			{CC112X_MDMCFG1, 0x06},
-			{CC112X_MDMCFG0, 0x44},
+			{CC112X_MDMCFG0, 0x65},
 			{CC112X_SYMBOL_RATE2, 0x63},
 			{CC112X_AGC_REF, 0x30},
-			{CC112X_AGC_CS_THR, 0xEC},
+			{CC112X_AGC_CS_THR, 0x19},
 			{CC112X_AGC_CFG3, 0xD1},
 			{CC112X_AGC_CFG2, 0x3F},
-			{CC112X_AGC_CFG1, 0x32},
+			{CC112X_AGC_CFG1, 0x00},
 			{CC112X_AGC_CFG0, 0x9F},
 			{CC112X_FIFO_CFG, 0x00},
 			{CC112X_FS_CFG, 0x12},
@@ -332,11 +329,12 @@ extern "C"
 			{CC112X_PKT_CFG1, 0x00},
 			{CC112X_PKT_CFG0, 0x20},
 			//27dBm
-			{CC112X_PA_CFG2, 0x77},
-			{CC112X_PA_CFG0, 0x7D},
+			//{CC112X_PA_CFG2, 0x77},
+			//{CC112X_PA_CFG0, 0x7D},
 			//17dBm
-				    // {CC112X_PA_CFG2,           0x7F},
-				    // {CC112X_PA_CFG0,           0x7D},
+			{CC112X_PA_CFG2,           0x7C}, //PA RAMPING - ON
+			//{CC112X_PA_CFG2,           0x3C}, //PA RAMPING - OFF
+			{CC112X_PA_CFG0,           0x7E},
 
 			{CC112X_IF_MIX_CFG, 0x00},
 			{CC112X_FREQOFF_CFG, 0x00},

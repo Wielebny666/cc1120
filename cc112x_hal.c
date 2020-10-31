@@ -24,6 +24,7 @@
 /*********************
  *      DEFINES
  *********************/
+#define ESP_INTR_FLAG_DEFAULT 0
 
 /**********************
  *      TYPEDEFS
@@ -37,6 +38,7 @@ typedef struct
 /**********************
  *  STATIC PROTOTYPES
  **********************/
+static void IRAM_ATTR cc112x_cs_gpio_isr_handler(void *arg);
 static esp_err_t cc112x_hgm_init(gpio_num_t hgm_gpio);
 
 /**********************
@@ -46,6 +48,7 @@ static const char *TAG = "cc112x_hal";
 
 static spi_device_handle_t cc112x_spi_handle = NULL;
 static gpio_num_t cc112x_hgm_input = GPIO_NUM_NC;
+static carrier_sense_callback_t carrier_sense_callback = NULL;
 
 /**********************
  *      MACROS
@@ -113,6 +116,34 @@ cc112x_handle_t cc112x_create(const cc112x_cfg_t *spi_cfg)
 	}
 
 	return cc112x_dev;
+}
+
+esp_err_t cc112x_cs_intr_init(gpio_num_t cs_gpio, carrier_sense_callback_t cb)
+{
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
+	CHECK((cb != NULL), ESP_ERR_INVALID_ARG, "CALLBACK FUNC NOT EXIST");
+	CHECK(GPIO_IS_VALID_GPIO(cs_gpio), ESP_ERR_INVALID_ARG, "WRONG GPIO NUM");
+
+    gpio_config_t gpio_in_conf =
+	{
+		.mode = GPIO_MODE_INPUT,
+		.intr_type = GPIO_INTR_ANYEDGE,
+		.pin_bit_mask = (1ULL << cs_gpio),
+		.pull_down_en = GPIO_PULLDOWN_ENABLE,
+		.pull_up_en = GPIO_PULLUP_DISABLE, };
+
+    esp_err_t ret = gpio_config(&gpio_in_conf);
+    CHECK(ret == ESP_OK, ret, "GPIO %d CONFIG FAIL", cs_gpio);
+    //install gpio isr service
+    ret = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+    //CHECK(ret == ESP_OK, ret, "GPIO %d ISR SERVICE FAIL", w_up_gpio);
+    //hook isr handler for specific gpio pin
+    ret = gpio_isr_handler_add(cs_gpio, cc112x_cs_gpio_isr_handler, (void*) cs_gpio);
+    CHECK(ret == ESP_OK, ret, "GPIO %d ISR HANDLER ADD FAIL", cs_gpio);
+	carrier_sense_callback = cb;
+
+	return ESP_OK;
 }
 
 esp_err_t cc112x_destroy(cc112x_handle_t handle, bool del_bus)
@@ -339,3 +370,13 @@ static esp_err_t cc112x_hgm_init(gpio_num_t hgm_gpio)
 	cc112x_hgm_input = hgm_gpio;
 	return resp;
 }
+
+static void IRAM_ATTR cc112x_cs_gpio_isr_handler(void *arg)
+{
+	gpio_num_t w_up_gpio = (gpio_num_t)arg;
+	int gpio_lvl = gpio_get_level(w_up_gpio);
+	if (carrier_sense_callback != NULL){
+		carrier_sense_callback(gpio_lvl);
+	}
+}
+

@@ -32,6 +32,7 @@
  *  STATIC PROTOTYPES
  **********************/
 static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error);
+static int8_t sm2tc(int8_t x);
 
 /**********************
  *  STATIC VARIABLES
@@ -121,12 +122,12 @@ state_t cc112x_get_chip_status(void)
 
 /**
  *
- * @fn         cc112x_get_rssi
+ * @fn         cc112x_get_8bit_rssi
  * @param       none
  *
  * @return      none
  */
-int8_t cc112x_get_rssi(void)
+int8_t cc112x_get_8bit_rssi(void)
 {
 	uint8_t rssi = 0;
 	if (cc112x_get_rssi_valid())
@@ -137,25 +138,31 @@ int8_t cc112x_get_rssi(void)
 	return 0;
 }
 
+float cc112x_get_12bit_rssi(void)
+{
+	uint8_t rssi2complMSB;
+	uint8_t rssi2complLSB;
+	int16_t rssi2compl;
+	float rssiConverted;
+
+	cc112x_read_register(CC112X_RSSI1, &rssi2complMSB);
+	cc112x_read_register(CC112X_RSSI0, &rssi2complLSB);
+
+	if (rssi2complLSB & 0x01)
+	{
+		// Shift the bits in place and add the 4 last bits
+		rssi2compl = ((int8_t)(rssi2complMSB) << 4) | ((int8_t)(rssi2complLSB) >> 3);
+		rssiConverted = (float)((rssi2compl)*0.0625) + RF_RSSI_OFFSET;
+		return rssiConverted;
+	}
+	return 0;
+}
+
 uint8_t cc112x_get_partnum(void)
 {
 	uint8_t ver = 0;
 	cc112x_read_register(CC112X_PARTVERSION, &ver);
 	return ver;
-}
-
-int8_t cc112x_get_converted_rssi(void)
-{
-	uint8_t rssi1;
-	uint8_t rssi0;
-
-	cc112x_read_register(CC112X_RSSI1, &rssi1);
-	cc112x_read_register(CC112X_RSSI0, &rssi0);
-
-	if (rssi0 & 0x01)
-		return (int16_t)((rssi1 << 3) | ((rssi0 & 0b01111000) >> 3)) * 0.0625 + RF_RSSI_OFFSET;
-	else
-		return 0;
 }
 
 /**
@@ -261,11 +268,9 @@ void cc112x_set_modulation(mod_format_t mod)
 
 void cc112x_set_ramp_shape(uint8_t value)
 {
-	if (value > 3)
-		value = 3;
 	pa_cfg1_t pa_cfg1;
 	cc112x_read_register(CC112X_PA_CFG1, &pa_cfg1.reg);
-	pa_cfg1.ramp_shape = value;
+	pa_cfg1.ramp_shape = value > 3 ? 3 : value;
 	cc112x_write_register(CC112X_PA_CFG1, pa_cfg1.reg);
 }
 
@@ -279,11 +284,9 @@ void cc112x_set_pa_ramping(bool value)
 
 void cc112x_set_agc_ask_decay(uint8_t value)
 {
-	if (value > 3)
-		value = 3;
 	agc_cfg0_t agc_cfg0;
 	cc112x_read_register(CC112X_AGC_CFG0, &agc_cfg0.reg);
-	agc_cfg0.agc_ask_decay = value;
+	agc_cfg0.agc_ask_decay = value > 3 ? 3 : value;
 	cc112x_write_register(CC112X_AGC_CFG0, agc_cfg0.reg);
 }
 
@@ -300,23 +303,19 @@ void cc112x_set_tx_power(int8_t power)
 
 void cc112x_set_pa_power_ramp(uint8_t value)
 {
-	if (value > 0x3F)
-		value = 0x3F;
 	pa_cfg2_t pa_cfg2;
 	ESP_ERROR_CHECK(cc112x_read_register(CC112X_PA_CFG2, &pa_cfg2.reg));
 	ESP_LOGE(TAG, "%d", pa_cfg2.pa_power_ramp);
-	pa_cfg2.pa_power_ramp = value;
+	pa_cfg2.pa_power_ramp = value > 0x3F ? 0x3F : value;
 	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PA_CFG2, pa_cfg2.reg));
 }
 
 void cc112x_set_ask_depth(uint8_t value)
 {
-	if (value > 0x0F)
-		value = 0x0F;
 	pa_cfg0_t pa_cfg0;
 	ESP_ERROR_CHECK(cc112x_read_register(CC112X_PA_CFG0, &pa_cfg0.reg));
 	ESP_LOGE(TAG, "%d", pa_cfg0.ask_depth);
-	pa_cfg0.ask_depth = value;
+	pa_cfg0.ask_depth = value > 0x0F ? 0x0F : value;
 	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PA_CFG0, pa_cfg0.reg));
 }
 
@@ -370,7 +369,14 @@ void cc112x_set_gpio3_cfg(gpiox_cfg_t cfg)
 void cc112x_set_cs_threshold(int8_t cs_th)
 {
 	int8_t th_cal = cs_th - RF_RSSI_OFFSET;
-	cc112x_write_register(CC112X_AGC_CS_THR, th_cal);
+	cc112x_write_register(CC112X_AGC_CS_THR, (uint8_t)th_cal);
+}
+
+int8_t cc112x_get_cs_threshold(void)
+{
+	int8_t cs_thr;
+	cc112x_read_register(CC112X_AGC_CS_THR, (uint8_t *)&cs_thr);
+	return cs_thr + RF_RSSI_OFFSET; 
 }
 
 void cc112x_set_bw_filter_khz(uint8_t bw_filter_value_khz)
@@ -662,9 +668,9 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 	int8_t sign;
 
 	/* the incoming data is 16 bit two complement format, separate "sign" */
-	if (freq_reg_error > 32768)
+	if (freq_reg_error >= (INT16_MAX - 1))
 	{
-		freq_error_est = -(freq_reg_error - 65535);
+		freq_error_est = -(freq_reg_error - UINT16_MAX);
 		sign = -1;
 	}
 	else
@@ -681,4 +687,12 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 	freq_error_est_int = freq_error_est * sign;
 
 	return freq_error_est_int;
+}
+
+// Convert from Sign Magnitude x to Two's Complement y
+static int8_t sm2tc(int8_t x)
+{
+	char sign = x & INT8_MIN;
+	char negmask = UINT8_MAX + !sign;
+	return (x & ~negmask) | (negmask & ((~x + 1) ^ INT8_MIN));
 }
