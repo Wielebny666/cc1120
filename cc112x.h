@@ -31,6 +31,7 @@ extern "C"
  * GLOBAL PROTOTYPES
  **********************/
 void cc112x_init_config(void);
+void cc112x_set_radio_config(data_rate_t cfg);
 void cc112x_read_config(void);
 void cc112x_print_config(void);
 

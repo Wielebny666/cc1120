@@ -373,8 +373,9 @@ static esp_err_t cc112x_hgm_init(gpio_num_t hgm_gpio)
 
 static void IRAM_ATTR cc112x_cs_gpio_isr_handler(void *arg)
 {
-	gpio_num_t w_up_gpio = (gpio_num_t)arg;
-	int gpio_lvl = gpio_get_level(w_up_gpio);
+	gpio_num_t cs_gpio = (gpio_num_t)arg;
+	int gpio_lvl = gpio_get_level(cs_gpio);
+//	ESP_EARLY_LOGD(TAG, "%s - lvl %d", __FUNCTION__, gpio_lvl);
 	if (carrier_sense_callback != NULL){
 		carrier_sense_callback(gpio_lvl);
 	}
