@@ -53,12 +53,12 @@ static carrier_sense_callback_t carrier_sense_callback = NULL;
 /**********************
  *      MACROS
  **********************/
-#define CHECK(a, ret_val, str, ...)                                               \
-      if (!(a))                                                                   \
-      {                                                                           \
-            ESP_LOGE(TAG, "%s(%u): " str, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
-            return (ret_val);                                                     \
-      }
+#define CHECK(a, ret_val, str, ...)                                           \
+	if (!(a))                                                                 \
+	{                                                                         \
+		ESP_LOGE(TAG, "%s(%u): " str, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+		return (ret_val);                                                     \
+	}
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -67,7 +67,7 @@ cc112x_handle_t cc112x_create(const cc112x_cfg_t *spi_cfg)
 {
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
-	cc112x_dev_t *cc112x_dev = (cc112x_dev_t*) calloc(1, sizeof(cc112x_dev_t));
+	cc112x_dev_t *cc112x_dev = (cc112x_dev_t *)calloc(1, sizeof(cc112x_dev_t));
 	CHECK((cc112x_dev != NULL), NULL, "CC112X ALLOC FAIL");
 
 	spi_bus_config_t buscfg =
@@ -83,9 +83,9 @@ cc112x_handle_t cc112x_create(const cc112x_cfg_t *spi_cfg)
 	spi_device_interface_config_t devcfg =
 		{
 			.clock_speed_hz = spi_cfg->spi_clock_speed_hz, //Clock out at 10 MHz
-			.mode = 3,                                     	//SPI mode 1
-			.spics_io_num = spi_cfg->cs,                   	//CS pin
-			.queue_size = 1, //We want to be able to queue 7 transactions at a time
+			.mode = 3,									   //SPI mode 1
+			.spics_io_num = spi_cfg->cs,				   //CS pin
+			.queue_size = 1,							   //We want to be able to queue 7 transactions at a time
 			.command_bits = 2,
 			.address_bits = 6,
 		};
@@ -125,22 +125,23 @@ esp_err_t cc112x_cs_intr_init(gpio_num_t cs_gpio, carrier_sense_callback_t cb)
 	CHECK((cb != NULL), ESP_ERR_INVALID_ARG, "CALLBACK FUNC NOT EXIST");
 	CHECK(GPIO_IS_VALID_GPIO(cs_gpio), ESP_ERR_INVALID_ARG, "WRONG GPIO NUM");
 
-    gpio_config_t gpio_in_conf =
-	{
-		.mode = GPIO_MODE_INPUT,
-		.intr_type = GPIO_INTR_ANYEDGE,
-		.pin_bit_mask = (1ULL << cs_gpio),
-		.pull_down_en = GPIO_PULLDOWN_ENABLE,
-		.pull_up_en = GPIO_PULLUP_DISABLE, };
+	gpio_config_t gpio_in_conf =
+		{
+			.mode = GPIO_MODE_INPUT,
+			.intr_type = GPIO_INTR_POSEDGE,
+			.pin_bit_mask = (1ULL << cs_gpio),
+			.pull_down_en = GPIO_PULLDOWN_ENABLE,
+			.pull_up_en = GPIO_PULLUP_DISABLE,
+		};
 
-    esp_err_t ret = gpio_config(&gpio_in_conf);
-    CHECK(ret == ESP_OK, ret, "GPIO %d CONFIG FAIL", cs_gpio);
-    //install gpio isr service
-    ret = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-    //CHECK(ret == ESP_OK, ret, "GPIO %d ISR SERVICE FAIL", w_up_gpio);
-    //hook isr handler for specific gpio pin
-    ret = gpio_isr_handler_add(cs_gpio, cc112x_cs_gpio_isr_handler, (void*) cs_gpio);
-    CHECK(ret == ESP_OK, ret, "GPIO %d ISR HANDLER ADD FAIL", cs_gpio);
+	esp_err_t ret = gpio_config(&gpio_in_conf);
+	CHECK(ret == ESP_OK, ret, "GPIO %d CONFIG FAIL", cs_gpio);
+	//install gpio isr service
+	ret = gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+	//CHECK(ret == ESP_OK, ret, "GPIO %d ISR SERVICE FAIL", w_up_gpio);
+	//hook isr handler for specific gpio pin
+	ret = gpio_isr_handler_add(cs_gpio, cc112x_cs_gpio_isr_handler, (void *)cs_gpio);
+	CHECK(ret == ESP_OK, ret, "GPIO %d ISR HANDLER ADD FAIL", cs_gpio);
 	carrier_sense_callback = cb;
 
 	return ESP_OK;
@@ -148,7 +149,7 @@ esp_err_t cc112x_cs_intr_init(gpio_num_t cs_gpio, carrier_sense_callback_t cb)
 
 esp_err_t cc112x_destroy(cc112x_handle_t handle, bool del_bus)
 {
-	cc112x_dev_t *dev = (cc112x_dev_t*) handle;
+	cc112x_dev_t *dev = (cc112x_dev_t *)handle;
 	esp_err_t error = ESP_OK;
 	CHECK((handle != NULL), ESP_ERR_INVALID_STATE, "SPI interface uninitialized.");
 	error = spi_bus_remove_device(dev->spi_handle);
@@ -198,9 +199,8 @@ esp_err_t cc112x_write_register(uint16_t addr, const uint8_t byte)
 			{
 				.base = tx_trans,
 				.command_bits = 2,
-				.address_bits = 14
-			};
-		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t*) &tx_trans_ext);
+				.address_bits = 14};
+		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t *)&tx_trans_ext);
 	}
 	else
 	{
@@ -234,7 +234,7 @@ esp_err_t cc112x_write_burst_registers(uint16_t addr, const uint8_t *bytes, cons
 				.command_bits = 2,
 				.address_bits = 14,
 			};
-		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t*) &tx_trans_ext);
+		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t *)&tx_trans_ext);
 	}
 	else
 	{
@@ -268,7 +268,7 @@ esp_err_t cc112x_read_register(uint16_t addr, uint8_t *byte)
 				.command_bits = 2,
 				.address_bits = 14,
 			};
-		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t*) &tx_trans_ext);
+		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t *)&tx_trans_ext);
 	}
 	else
 	{
@@ -302,7 +302,7 @@ esp_err_t cc112x_read_burst_registers(uint16_t addr, uint8_t *bytes, uint8_t len
 				.command_bits = 2,
 				.address_bits = 14,
 			};
-		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t*) &tx_trans_ext);
+		error = spi_device_polling_transmit(cc112x_spi_handle, (spi_transaction_t *)&tx_trans_ext);
 	}
 	else
 	{
@@ -375,9 +375,9 @@ static void IRAM_ATTR cc112x_cs_gpio_isr_handler(void *arg)
 {
 	gpio_num_t cs_gpio = (gpio_num_t)arg;
 	int gpio_lvl = gpio_get_level(cs_gpio);
-//	ESP_EARLY_LOGD(TAG, "%s - lvl %d", __FUNCTION__, gpio_lvl);
-	if (carrier_sense_callback != NULL){
+	//	ESP_EARLY_LOGD(TAG, "%s - lvl %d", __FUNCTION__, gpio_lvl);
+	if (carrier_sense_callback != NULL)
+	{
 		carrier_sense_callback(gpio_lvl);
 	}
 }
-

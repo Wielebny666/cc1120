@@ -89,10 +89,22 @@ typedef union __attribute__((__packed__, aligned(1)))
 		uint8_t carrier_sense_valid :1;
 		uint8_t carrier_sense :1;
 		uint8_t rssi_3_0 :4;
-		uint8_t rssi0_not_usef :1;
+		uint8_t rssi0_not_used :1;
 	};
 	uint8_t reg;
 }rssi0_t;
+
+typedef union __attribute__((__packed__, aligned(1)))
+{
+	struct
+	{
+		marcstate_e marc_state :5;
+		uint8_t marc_2pin_state :2;
+		uint8_t marcstate_not_used :1;
+	};
+	uint8_t reg;
+}marcstate_t;
+
 
 typedef union __attribute__((__packed__, aligned(1)))
 {
@@ -197,6 +209,20 @@ typedef union __attribute__((__packed__, aligned(1)))
 	};
 	uint8_t reg;
 }cfm_data_cfg_t;
+
+
+typedef union __attribute__((__packed__, aligned(1)))
+{
+	struct __attribute__((__packed__, aligned(1)))
+	{
+		uint8_t pkt_format :2;
+		uint8_t cca_mode :3;
+		uint8_t pkt_cfg2_reserved5 :1;
+		uint8_t pkt_cfg2_not_used :2;
+	};
+	uint8_t reg;
+}pkt_cfg2_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/

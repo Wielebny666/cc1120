@@ -9,6 +9,9 @@
  *      INCLUDES
  *********************/
 #include <math.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include "esp_log.h"
 
 #include "cc112x_cfg.h"
@@ -65,7 +68,7 @@ static const uint16_t cc112x_radio_cfg[][11] =
 		{0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x60, 0x60, CC112X_AGC_CFG2},
 		{0xCF, 0xCF, 0xCF, 0xCF, 0xCF, 0xCF, 0xC0, 0xC0, 0xC0, 0xC0, CC112X_AGC_CFG0},
 		{0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, CC112X_FS_CFG},
-//		{0x7E, 0x7E, 0x7E, 0x7D, 0x7C, 0x7B, 0x79, 0x7B, 0x02, 0x01, CC112X_PA_CFG0},
+		//		{0x7E, 0x7E, 0x7E, 0x7D, 0x7C, 0x7B, 0x79, 0x7B, 0x02, 0x01, CC112X_PA_CFG0},
 		{0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x20, 0x20, CC112X_FREQOFF_CFG},
 		{0x0B, 0x0B, 0x0B, 0x0B, 0x0B, 0x0B, 0x0A, 0x0A, 0x0A, 0x0A, CC112X_TOC_CFG},
 };
@@ -82,11 +85,64 @@ void cc112x_init_config(void)
 {
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
-	//foreach (cc112x_reg_setting_t *cfg, preferredSettings) //cc112x_tx_reg_setting) //cc112x_test_reg_setting)//
-	foreach (cc112x_reg_setting_t *cfg, ook_870_transparent)
+	//foreach (cc112x_reg_setting_t *cfg,  preferredSettings) //test) // //cc112x_tx_reg_setting) //cc112x_test_reg_setting)//
+	foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx)
 	{
 		cc112x_write_register(cfg->addr, cfg->data);
 	}
+}
+
+void cc112x_choice_config(uint8_t choice)
+{
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
+	switch (choice)
+	{
+	case 0:
+	{
+		foreach (cc112x_reg_setting_t *cfg, test)
+		{
+			cc112x_write_register(cfg->addr, cfg->data);
+		}
+		break;
+	}
+	case 1:
+	{
+		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx)
+		{
+			cc112x_write_register(cfg->addr, cfg->data);
+		}
+		break;
+	}
+	case 2:
+	{
+		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx_2)
+		{
+			cc112x_write_register(cfg->addr, cfg->data);
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void cc112x_send_data(const uint8_t *buff, uint8_t len)
+{
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+	marcstate_t marcstate;
+
+	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PKT_LEN, len));
+	ESP_ERROR_CHECK(cc112x_write_burst_registers(CC112X_FIFO, buff, len));
+	cc112x_set_tx_state();
+	do
+	{
+		vTaskDelay(50 / portTICK_PERIOD_MS);
+		cc112x_read_register(CC112X_MARCSTATE, &marcstate);
+		ESP_LOGD(TAG, "MARC STATE %d", marcstate.marc_state);
+	} while (marcstate.marc_state != MARCSTATE_IDDLE);
+
+	cc112x_set_flush_tx();
 }
 
 void cc112x_set_radio_config(data_rate_t cfg)
@@ -137,11 +193,25 @@ void cc112x_set_tx_state(void)
 	cc112x_command_strobe(CC112X_STX);
 }
 
+void cc112x_set_flush_tx(void)
+{
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
+	cc112x_command_strobe(CC112X_SFTX);
+}
+
 void cc112x_set_rx_state(void)
 {
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
 	cc112x_command_strobe(CC112X_SRX);
+}
+
+void cc112x_set_flush_rx(void)
+{
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
+	cc112x_command_strobe(CC112X_SFRX);
 }
 
 bool cc112x_get_rssi_valid(void)
@@ -272,11 +342,19 @@ bool cc112x_get_carrier_sense(void)
 	return rssi0.carrier_sense;
 }
 
-void cc112x_set_agc_behaviour(uint8_t value)
+void cc112x_set_agc_sync_behaviour(uint8_t value)
 {
 	agc_cfg1_t agc_cfg1;
 	cc112x_read_register(CC112X_AGC_CFG1, &agc_cfg1.reg);
 	agc_cfg1.agc_sync_behaviour = value > 7 ? 7 : value;
+	cc112x_write_register(CC112X_AGC_CFG1, agc_cfg1.reg);
+}
+
+void cc112x_set_agc_win_size(uint8_t value)
+{
+	agc_cfg1_t agc_cfg1;
+	cc112x_read_register(CC112X_AGC_CFG1, &agc_cfg1.reg);
+	agc_cfg1.agc_win_size = value > 5 ? 5 : value;
 	cc112x_write_register(CC112X_AGC_CFG1, agc_cfg1.reg);
 }
 

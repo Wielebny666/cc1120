@@ -31,13 +31,18 @@ extern "C"
  * GLOBAL PROTOTYPES
  **********************/
 void cc112x_init_config(void);
+void cc112x_choice_config(uint8_t choice);
 void cc112x_set_radio_config(data_rate_t cfg);
 void cc112x_read_config(void);
 void cc112x_print_config(void);
 
+void cc112x_send_data(const uint8_t *buff,  uint8_t len);
+
 void cc112x_reset(void);
 void cc112x_set_tx_state(void);
+void cc112x_set_flush_tx(void);
 void cc112x_set_rx_state(void);
+void cc112x_set_flush_rx(void);
 bool cc112x_get_rssi_valid(void);
 void cc112x_set_idle_state(void);
 int8_t cc112x_get_8bit_rssi(void);
@@ -47,7 +52,8 @@ uint32_t cc112x_get_symbol_rate(void);
 void cc112x_set_symbol_rate_khz(uint8_t baud_rate_in_khz);
 state_t cc112x_get_chip_status(void);
 bool cc112x_get_carrier_sense(void);
-void cc112x_set_agc_behaviour(uint8_t value);
+void cc112x_set_agc_sync_behaviour(uint8_t value);
+void cc112x_set_agc_win_size(uint8_t value);
 void cc112x_set_agc_settle_wait(uint8_t value);
 void cc112x_set_agc_ask_decay(uint8_t value);
 void cc112x_set_ask_depth(uint8_t value);
