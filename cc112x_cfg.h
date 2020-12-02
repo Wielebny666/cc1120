@@ -47,7 +47,7 @@ extern "C"
 // TX Power = 27 
 // Whitening = false 
 
-static const cc112x_reg_setting_t test[]= 
+static const cc112x_reg_setting_t ook_870_packet_tx[]= 
 {
 	{CC112X_DEVIATION_M,       0x26},
 	{CC112X_MODCFG_DEV_E,      0x1D},
@@ -92,6 +92,69 @@ static const cc112x_reg_setting_t test[]=
 	{CC112X_XOSC1,             0x03},
 };
 
+// Address Config = No address check 
+// Bit Rate = 4.8 
+// Carrier Frequency = 880.000000 
+// Deviation = 17.944336 
+// Device Address = 0 
+// Manchester Enable = false 
+// Modulation Format = ASK/OOK 
+// PA Ramping = true 
+// Packet Bit Length = 0 
+// Packet Length = 3 
+// Packet Length Mode = Variable 
+// Performance Mode = High Performance 
+// RX Filter BW = 66.666667 
+// Symbol rate = 4.8 
+// TX Power = 27 
+// Whitening = false 
+
+static const cc112x_reg_setting_t ook_880_transparent_tx[]= 
+{
+  {CC112X_DEVIATION_M,       0x26},
+  {CC112X_MODCFG_DEV_E,      0x1D},
+  {CC112X_DCFILT_CFG,        0x13},
+  {CC112X_PREAMBLE_CFG1,     0x00},
+  {CC112X_PREAMBLE_CFG0,     0x33},
+  {CC112X_IQIC,              0x00},
+  {CC112X_CHAN_BW,           0x03},
+  {CC112X_MDMCFG1,           0x06},
+  {CC112X_MDMCFG0,           0x44},
+  {CC112X_SYMBOL_RATE2,      0x63},
+  {CC112X_AGC_REF,           0x30},
+  {CC112X_AGC_CS_THR,        0xEC},
+  {CC112X_AGC_CFG3,          0xD1},
+  {CC112X_AGC_CFG2,          0x3F},
+  {CC112X_AGC_CFG1,          0x32},
+  {CC112X_AGC_CFG0,          0x9F},
+  {CC112X_FIFO_CFG,          0x00},
+  {CC112X_FS_CFG,            0x12},
+  {CC112X_PKT_CFG2,          0x07},
+  {CC112X_PKT_CFG1,          0x00},
+  {CC112X_PKT_CFG0,          0x20},
+//27dBm
+	{CC112X_PA_CFG2,           0x7C}, //PA RAMPING - ON
+	{CC112X_PA_CFG0,           0x7E},
+  {CC112X_IF_MIX_CFG,        0x00},
+  {CC112X_FREQOFF_CFG,       0x00},
+  {CC112X_TOC_CFG,           0x0A},
+  {CC112X_FREQ2,             0x6E},
+  {CC112X_FS_DIG1,           0x00},
+  {CC112X_FS_DIG0,           0x5F},
+  {CC112X_FS_CAL1,           0x40},
+  {CC112X_FS_CAL0,           0x0E},
+  {CC112X_FS_DIVTWO,         0x03},
+  {CC112X_FS_DSM0,           0x33},
+  {CC112X_FS_DVC0,           0x17},
+  {CC112X_FS_PFD,            0x50},
+  {CC112X_FS_PRE,            0x6E},
+  {CC112X_FS_REG_DIV_CML,    0x14},
+  {CC112X_FS_SPARE,          0xAC},
+  {CC112X_FS_VCO0,           0xB4},
+  {CC112X_XOSC5,             0x0E},
+  {CC112X_XOSC1,             0x03},
+  {CC112X_SERIAL_STATUS,     0x08},
+};
 
 	// Address Config = No address check
 	// Bit Rate = 10
@@ -365,7 +428,7 @@ static const cc112x_reg_setting_t test[]=
 	// TX Power = 27
 	// Whitening = false
 
-	static cc112x_reg_setting_t ook_870_transparent_rx[] =
+	static cc112x_reg_setting_t ook_870_transparent_tx[] =
 		{
 			{CC112X_DEVIATION_M, 0x26},
 			{CC112X_MODCFG_DEV_E, 0x1D},

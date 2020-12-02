@@ -86,7 +86,7 @@ void cc112x_init_config(void)
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
 	//foreach (cc112x_reg_setting_t *cfg,  preferredSettings) //test) // //cc112x_tx_reg_setting) //cc112x_test_reg_setting)//
-	foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx)
+	foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_tx)
 	{
 		cc112x_write_register(cfg->addr, cfg->data);
 	}
@@ -100,7 +100,7 @@ void cc112x_choice_config(uint8_t choice)
 	{
 	case 0:
 	{
-		foreach (cc112x_reg_setting_t *cfg, test)
+		foreach (cc112x_reg_setting_t *cfg, ook_870_packet_tx)
 		{
 			cc112x_write_register(cfg->addr, cfg->data);
 		}
@@ -108,7 +108,7 @@ void cc112x_choice_config(uint8_t choice)
 	}
 	case 1:
 	{
-		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx)
+		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_tx)
 		{
 			cc112x_write_register(cfg->addr, cfg->data);
 		}
@@ -117,6 +117,14 @@ void cc112x_choice_config(uint8_t choice)
 	case 2:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx_2)
+		{
+			cc112x_write_register(cfg->addr, cfg->data);
+		}
+		break;
+	}
+	case 3:
+	{
+		foreach (cc112x_reg_setting_t *cfg, ook_880_transparent_tx)
 		{
 			cc112x_write_register(cfg->addr, cfg->data);
 		}

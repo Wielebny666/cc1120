@@ -66,7 +66,7 @@ typedef enum
 
 typedef enum
 {
-	SERIAL_RX = 9,
+	SERIAL_TX_RX = 9,
 	RSSI_VALID = 13,
 	CARRIER_SENSE_VALID = 16,
 	CARRIER_SENSE = 17,
