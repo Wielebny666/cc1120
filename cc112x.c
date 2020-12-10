@@ -35,7 +35,6 @@
  *  STATIC PROTOTYPES
  **********************/
 static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error);
-static int8_t sm2tc(int8_t x);
 
 /**********************
  *  STATIC VARIABLES
@@ -125,6 +124,14 @@ void cc112x_choice_config(uint8_t choice)
 	case 3:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_880_transparent_tx)
+		{
+			cc112x_write_register(cfg->addr, cfg->data);
+		}
+		break;
+	}
+	case 4:
+	{
+		foreach (cc112x_reg_setting_t *cfg, ook_868_transparent_tx)
 		{
 			cc112x_write_register(cfg->addr, cfg->data);
 		}
@@ -792,7 +799,7 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 	int8_t sign;
 
 	/* the incoming data is 16 bit two complement format, separate "sign" */
-	if (freq_reg_error >= (INT16_MAX - 1))
+	if (freq_reg_error > INT16_MAX)
 	{
 		freq_error_est = -(freq_reg_error - UINT16_MAX);
 		sign = -1;
@@ -813,10 +820,3 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 	return freq_error_est_int;
 }
 
-// Convert from Sign Magnitude x to Two's Complement y
-static int8_t sm2tc(int8_t x)
-{
-	char sign = x & INT8_MIN;
-	char negmask = UINT8_MAX + !sign;
-	return (x & ~negmask) | (negmask & ((~x + 1) ^ INT8_MIN));
-}
