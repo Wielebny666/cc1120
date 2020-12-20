@@ -24,6 +24,15 @@ extern "C"
 /**********************
  *      TYPEDEFS
  **********************/
+typedef enum cc112x_radio_cfg_t
+{
+    CFG_OOK_870_PACKET_TX,
+    CFG_OOK_870_ASYNC_TX,
+	CFG_OOK_870_ASYNC_RX,
+	CFG_OOK_880_ASYNC_TX,
+	CFG_OOK_868_ASYNC_TX
+} cc112x_radio_cfg_t;
+
 typedef enum
 {
 	STATE_IDLE = 0,

@@ -91,13 +91,13 @@ void cc112x_init_config(void)
 	}
 }
 
-void cc112x_choice_config(uint8_t choice)
+void cc112x_choice_config(cc112x_radio_cfg_t choice)
 {
 	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
 	switch (choice)
 	{
-	case 0:
+	case CFG_OOK_870_PACKET_TX:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_870_packet_tx)
 		{
@@ -105,7 +105,7 @@ void cc112x_choice_config(uint8_t choice)
 		}
 		break;
 	}
-	case 1:
+	case CFG_OOK_870_ASYNC_TX:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_tx)
 		{
@@ -113,7 +113,7 @@ void cc112x_choice_config(uint8_t choice)
 		}
 		break;
 	}
-	case 2:
+	case CFG_OOK_870_ASYNC_RX:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_870_transparent_rx_2)
 		{
@@ -121,7 +121,7 @@ void cc112x_choice_config(uint8_t choice)
 		}
 		break;
 	}
-	case 3:
+	case CFG_OOK_880_ASYNC_TX:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_880_transparent_tx)
 		{
@@ -129,7 +129,7 @@ void cc112x_choice_config(uint8_t choice)
 		}
 		break;
 	}
-	case 4:
+	case CFG_OOK_868_ASYNC_TX:
 	{
 		foreach (cc112x_reg_setting_t *cfg, ook_868_transparent_tx)
 		{
