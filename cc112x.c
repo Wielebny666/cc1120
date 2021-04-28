@@ -13,6 +13,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "esp_log.h"
+#include "esp_err.h"
 
 #include "cc112x_cfg.h"
 #include "cc112x_hal.h"

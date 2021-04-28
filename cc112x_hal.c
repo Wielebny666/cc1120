@@ -10,10 +10,6 @@
  *********************/
 #include <string.h>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
-
 #include "esp_log.h"
 #include "esp_err.h"
 
@@ -104,8 +100,11 @@ cc112x_handle_t cc112x_create(const cc112x_cfg_t *spi_cfg)
 	error = spi_bus_add_device(spi_cfg->spi_host, &devcfg, &cc112x_spi_handle);
 	CHECK((error == ESP_OK), NULL, "SPI device %d add fail", spi_cfg->spi_host);
 
-	error = cc112x_hgm_init(spi_cfg->hgm);
-	CHECK((error == ESP_OK), NULL, "HGM GPIO%d init fail", spi_cfg->hgm);
+	if (spi_cfg->hgm > 0)
+	{
+		error = cc112x_hgm_init(spi_cfg->hgm);
+		CHECK((error == ESP_OK), NULL, "HGM GPIO%d init fail", spi_cfg->hgm);
+	}
 
 	cc112x_dev->spi_config = *spi_cfg;
 	cc112x_dev->spi_handle = cc112x_spi_handle;

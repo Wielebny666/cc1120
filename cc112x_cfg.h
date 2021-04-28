@@ -613,6 +613,10 @@ static const cc112x_reg_setting_t ook_868_transparent_tx[]=
 //	{CC112X_PA_CFG0,           0x7E},
 	{CC112X_PA_CFG0,           0x78}, //TX upsampler factor P = 1 (bypassed)
 
+	//{CC112X_PA_CFG2,           0x6B}, //PA RAMPING - ON
+	//{CC112X_PA_CFG0,           0x50}, //TX upsampler factor P = 1 (bypassed)
+
+
   {CC112X_IF_MIX_CFG,        0x00},
   {CC112X_FREQOFF_CFG,       0x00},
   {CC112X_TOC_CFG,           0x0A},
