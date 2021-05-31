@@ -424,13 +424,23 @@ void cc112x_set_agc_ask_decay(uint8_t value)
 
 void cc112x_set_tx_power(int8_t power)
 {
-	if (power > 0x27)
-		power = 0x27;
+	if (power > 27)
+		power = 27;
 	else if (power < -16)
 		power = -16;
 	uint8_t pa_power_ramp;
 	pa_power_ramp = 2 * power + 35;
+	ESP_LOGE(TAG, "pa_power_ramp %d", pa_power_ramp);
 	cc112x_set_pa_power_ramp(pa_power_ramp);
+}
+
+void cc112x_set_ask_min_power(uint8_t min_value)
+{
+	uint8_t ask_depth;
+	uint8_t pa_power_ramp = cc112x_get_pa_power_ramp();
+	ask_depth = (pa_power_ramp + 1) / 4 - 9 - min_value / 2;
+	ESP_LOGE(TAG, "ask_depth %d", ask_depth);
+	cc112x_set_ask_depth(ask_depth);
 }
 
 void cc112x_set_pa_power_ramp(uint8_t value)
@@ -440,6 +450,13 @@ void cc112x_set_pa_power_ramp(uint8_t value)
 	ESP_LOGE(TAG, "%d", pa_cfg2.pa_power_ramp);
 	pa_cfg2.pa_power_ramp = value > 0x3F ? 0x3F : value;
 	ESP_ERROR_CHECK(cc112x_write_register(CC112X_PA_CFG2, pa_cfg2.reg));
+}
+
+uint8_t cc112x_get_pa_power_ramp(void)
+{
+	pa_cfg2_t pa_cfg2;
+	ESP_ERROR_CHECK(cc112x_read_register(CC112X_PA_CFG2, &pa_cfg2.reg));
+	return pa_cfg2.pa_power_ramp;
 }
 
 void cc112x_set_ask_depth(uint8_t value)
@@ -820,4 +837,3 @@ static int32_t cc112x_calculate_freq_error_est(uint16_t freq_reg_error)
 
 	return freq_error_est_int;
 }
-
