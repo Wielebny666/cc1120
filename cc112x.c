@@ -422,6 +422,14 @@ void cc112x_set_agc_ask_decay(uint8_t value)
 	cc112x_write_register(CC112X_AGC_CFG0, agc_cfg0.reg);
 }
 
+void cc112x_set_agc_hyst_level(uint8_t value)
+{
+	agc_cfg0_t agc_cfg0;
+	cc112x_read_register(CC112X_AGC_CFG0, &agc_cfg0.reg);
+	agc_cfg0.agc_hyst_level = value > 3 ? 3 : value;
+	cc112x_write_register(CC112X_AGC_CFG0, agc_cfg0.reg);
+}
+
 void cc112x_set_tx_power(int8_t power)
 {
 	if (power > 27)
@@ -620,6 +628,8 @@ uint32_t cc112x_get_carrier_freq(void)
  */
 void cc112x_set_carrier_freq(uint32_t freq)
 {
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
 	uint8_t freq_regs[3];
 	uint32_t freq_regs_uint32;
 	float f_vco;
@@ -647,6 +657,8 @@ void cc112x_set_carrier_freq(uint32_t freq)
 
 int32_t cc112x_get_mixer_freq(void)
 {
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
 	int8_t freq_if;
 	float f_if;
 
@@ -675,6 +687,8 @@ int32_t cc112x_get_mixer_freq(void)
  */
 int32_t cc112x_get_freq_error(void)
 {
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
+
 	uint8_t reg[2] = {0, 0};
 	cc112x_read_register(CC112X_FREQOFF_EST0, &reg[0]);
 	cc112x_read_register(CC112X_FREQOFF_EST1, &reg[1]);
@@ -693,6 +707,7 @@ int32_t cc112x_get_freq_error(void)
  */
 void cc112x_manual_calibration(void)
 {
+	ESP_LOGD(TAG, "%s", __FUNCTION__);
 
 	uint8_t original_fs_cal2;
 	uint8_t calResults_for_vcdac_start_high[3];

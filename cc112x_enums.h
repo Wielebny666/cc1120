@@ -123,6 +123,22 @@ typedef enum
 	DATA_RATE_MAX
 } data_rate_t;
 
+typedef enum
+{
+	HYST_LEVEL_2DB,
+	HYST_LEVEL_4DB,
+	HYST_LEVEL_7DB,
+	HYST_LEVEL_10DB,
+} hyst_level_t;
+
+typedef enum
+{
+	DECAY_600,
+	DECAY_1200,
+	DECAY_2500,
+	DECAY_5000,
+
+} decay_t;
 /**********************
  * GLOBAL PROTOTYPES
  **********************/

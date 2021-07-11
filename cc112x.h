@@ -66,6 +66,7 @@ extern "C"
     void cc112x_set_agc_win_size(uint8_t value);
     void cc112x_set_agc_settle_wait(uint8_t value);
     void cc112x_set_agc_ask_decay(uint8_t value);
+    void cc112x_set_agc_hyst_level(uint8_t value);
     void cc112x_set_ask_depth(uint8_t value);
 
     void cc112x_set_tx_power(int8_t power);
